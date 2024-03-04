@@ -9,6 +9,7 @@ from tags import POS_TAGS, SYNDP_TAGS
 from Dataset import Seq2SeqOIE
 from Model import T5
 from utils import *
+from Inference import InferOnCarb
 
 import argparse
 import os
@@ -69,6 +70,7 @@ if __name__=="__main__":
     parser.add_argument('--dim_pos', default=20, type=int)
     parser.add_argument('--dim_syndp', default=20, type=int)
     parser.add_argument('--dim_semdp', default=20, type=int)
+    parser.add_argument('--infer', default=True, type=bool)
 
     args = parser.parse_args()
 
@@ -95,3 +97,14 @@ if __name__=="__main__":
     dataloaders = {"train":train_loader, "validation":valid_loader, "test":test_loader}
     
     Trainer(args, model, tokenizer, device, optimizer, dataloaders)
+
+    if args.infer:
+        model_path = f"{args.output_dir}/model_files/pytorch_model.bin"
+
+        print(f"""[Model]: Loading {model_path}...\n""")
+        # model.load_state_dict(torch.load(model_path))
+
+        dataset = load_dataset("Thanmay/carb_seq2seq")
+
+        InferOnCarb(args, model, tokenizer, device, dataset)
+
