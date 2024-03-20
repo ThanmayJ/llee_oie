@@ -14,8 +14,7 @@ def train(args, epoch, tokenizer, model, device, loader, optimizer):
         
         pos_ids = data['pos_ids'].to(device, dtype = torch.long) if args.use_pos else None
         syndp_ids = data['syndp_ids'].to(device, dtype = torch.long) if args.use_syndp else None
-        semdp_ids = None
-        # semdp_ids = data['semdp_ids'].to(device, dtype = torch.long) if args.use_syndp else None
+        semdp_ids = data['semdp_ids'].to(device, dtype = torch.long) if args.use_semdp else None
 
         outputs = model(src_ids=src_ids, pos_ids=pos_ids, syndp_ids=syndp_ids, semdp_ids=semdp_ids, attention_mask=mask, decoder_input_ids=y_ids, labels=lm_labels)
         loss = outputs[0]
@@ -43,8 +42,7 @@ def validate(args, tokenizer, model, device, loader):
             
             pos_ids = data['pos_ids'].to(device, dtype = torch.long) if args.use_pos else None
             syndp_ids = data['syndp_ids'].to(device, dtype = torch.long) if args.use_syndp else None
-            semdp_ids = None
-            # semdp_ids = data['semdp_ids'].to(device, dtype = torch.long) if args.use_syndp else None
+            semdp_ids = data['semdp_ids'].to(device, dtype = torch.long) if args.use_semdp else None
 
             outputs = model(src_ids=src_ids, pos_ids=pos_ids, syndp_ids=syndp_ids, semdp_ids=semdp_ids, attention_mask=mask, decoder_input_ids=y_ids, labels=lm_labels)
             loss = outputs[0]
@@ -71,10 +69,9 @@ def test(args, tokenizer, model, device, loader):
             
             pos_ids = data['pos_ids'].to(device, dtype = torch.long) if args.use_pos else None
             syndp_ids = data['syndp_ids'].to(device, dtype = torch.long) if args.use_syndp else None
-            semdp_ids = None
-            # semdp_ids = data['semdp_ids'].to(device, dtype = torch.long) if args.use_syndp else None
+            semdp_ids = data['semdp_ids'].to(device, dtype = torch.long) if args.use_semdp else None
 
-            generated_ids = model.generate(src_ids=src_ids, pos_ids=pos_ids, syndp_ids=syndp_ids, attention_mask=mask)
+            generated_ids = model.generate(src_ids=src_ids, pos_ids=pos_ids, syndp_ids=syndp_ids, semdp_ids=semdp_ids, attention_mask=mask)
             preds = [tokenizer.decode(g, skip_special_tokens=True, clean_up_tokenization_spaces=True) for g in generated_ids]
             target = [tokenizer.decode(t, skip_special_tokens=True, clean_up_tokenization_spaces=True)for t in y]
             if _%10==0:
