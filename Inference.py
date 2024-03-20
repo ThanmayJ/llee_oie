@@ -5,7 +5,7 @@ from transformers import T5ForConditionalGeneration, T5TokenizerFast
 from datasets import load_dataset
 import pandas as pd
 
-from tags import POS_TAGS, SYNDP_TAGS
+from tags import POS_TAGS, SYNDP_TAGS, SEMDP_TAGS
 from Dataset import Seq2SeqOIE
 from Model import T5
 from utils import *
@@ -17,7 +17,7 @@ import time
 #Puttng it all up and calling the above functions:
 def InferOnCarb(args, model, tokenizer, device, dataset):
 
-    test_set = Seq2SeqOIE(dataset["test"], args.prefix, tokenizer, args.src_len, args.trg_len, "source", "target", pos_column="POS", syndp_column="SynDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS)
+    test_set = Seq2SeqOIE(dataset["test"], args.prefix, tokenizer, args.src_len, args.trg_len, "source", "target", pos_column="POS", syndp_column="SynDP", semdp_column="SemDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS, semdp_tags=SEMDP_TAGS)
 
     test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=0)
 
@@ -51,7 +51,7 @@ def InferOnCarb(args, model, tokenizer, device, dataset):
                         s.pop()
                 if len(s) > 3:
                     s[3], s[2] = s[2], s[3]
-            print(sent)
+            # print(sent)
             sent = [s for s in sent if len(s) > 4] # remove any empty lists
             try: #exception for TANL
                 temp = sent[-1]
