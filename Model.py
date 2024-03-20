@@ -6,8 +6,7 @@ from torch import nn
 
 from transformers import T5ForConditionalGeneration
 
-from tags import POS_TAGS, SYNDP_TAGS
-SEMDP_TAGS = SYNDP_TAGS
+from tags import POS_TAGS, SYNDP_TAGS, SEMDP_TAGS
 
 class T5(nn.Module):
     def __init__(self, args):

@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import Dataset
 from transformers import T5TokenizerFast
 
-from tags import POS_TAGS, SYNDP_TAGS
+from tags import POS_TAGS, SYNDP_TAGS, SEMDP_TAGS
 from datasets import load_dataset
 
 class Seq2SeqOIE(Dataset):
@@ -44,7 +44,7 @@ class Seq2SeqOIE(Dataset):
         target_text = str(self.target_text[index])
         source_pos = self.source_pos[index]
         source_syndp = self.source_syndp[index]
-        # source_semdp = self.source_semdp[index]
+        source_semdp = self.source_semdp[index]
 
         source_text = ' '.join(source_text.split())
         target_text = ' '.join(target_text.split())
@@ -83,13 +83,13 @@ class Seq2SeqOIE(Dataset):
         syndp_ids = [self.syndp_tag2idx[tok] if tok in self.syndp_tag2idx.keys() else self.tokenizer.unk_token_id for tok in syndp_tokens]
 
         # Source SemDP Tokens
-        # semdp_tokens = [self.tokenizer.pad_token] * self.source_len
-        # semdp_toks = self.semdp_tagger(source_text, source_semdp["words"], source_semdp["tags"])
-        # if len(semdp_toks) >= self.source_len - 1:
-        #     semdp_toks = semdp_toks[:self.source_len-1]
-        # semdp_toks += [self.tokenizer.eos_token]
-        # semdp_tokens[:source_tokens_len] = semdp_toks
-        # semdp_ids = [self.semdp_tag2idx[tok] if tok in self.semdp_tag2idx.keys() else self.tokenizer.unk_token_id for tok in semdp_tokens]
+        prefix_words = self.prefix.split() + [":"] 
+        source = self.tokenizer.batch_encode_plus([prefix_words + source_semdp["words"]], max_length=self.source_len, pad_to_max_length=True, truncation=True, padding="max_length", return_tensors='pt', is_split_into_words=True)        
+        source_ids = source['input_ids'].squeeze()
+        source_mask = source['attention_mask'].squeeze()
+        source_tokens = self.tokenizer.convert_ids_to_tokens(source_ids)
+        semdp_tokens = [self.tokenizer.pad_token if i in [None, *list(range(len(prefix_words)))] else source_semdp["tags"][i-len(prefix_words)] for i in source.word_ids()]
+        semdp_ids = [self.semdp_tag2idx[tok] if tok in self.semdp_tag2idx.keys() else self.tokenizer.unk_token_id for tok in semdp_tokens]
 
 
         # Target Text Tokens
@@ -109,7 +109,9 @@ class Seq2SeqOIE(Dataset):
             'pos_tokens': pos_tokens,
             'pos_ids': torch.tensor(pos_ids).to(dtype=torch.long),
             'syndp_tokens': syndp_tokens,
-            'syndp_ids': torch.tensor(syndp_ids).to(dtype=torch.long)
+            'syndp_ids': torch.tensor(syndp_ids).to(dtype=torch.long),
+            'semdp_tokens': semdp_tokens,
+            'semdp_ids': torch.tensor(semdp_ids).to(dtype=torch.long)
         }
     
 
