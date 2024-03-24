@@ -14,22 +14,24 @@ class T5(nn.Module):
         self.args = args
 
         self.t5 = T5ForConditionalGeneration.from_pretrained(args.model)
-        self.emb_dim = self.t5.encoder.embed_tokens.weight.shape[-1]      
+        self.emb_dim = self.t5.encoder.embed_tokens.weight.shape[-1]
+
+        self.num_special_tags = 3 # Refer Dataset.py, we have three additional tags - <pad>, <unk> and <eos>. This is added in the code below.      
         
         if self.args.use_wa:
             self.get_combined_embeds = self.get_combined_embeds_wa
             self.wt_src = args.wt_src  
             if self.args.use_pos:
                 self.wt_pos = self.args.wt_pos
-                self.embed_pos = nn.Embedding(len(POS_TAGS), self.emb_dim)
+                self.embed_pos = nn.Embedding(len(POS_TAGS)+self.num_special_tags, self.emb_dim)
                 nn.init.xavier_uniform_(self.embed_pos.weight.data)
             if self.args.use_syndp:
                 self.wt_syndp = self.args.wt_syndp
-                self.embed_syndp = nn.Embedding(len(SYNDP_TAGS), self.emb_dim)
+                self.embed_syndp = nn.Embedding(len(SYNDP_TAGS)+self.num_special_tags, self.emb_dim)
                 nn.init.xavier_uniform_(self.embed_syndp.weight.data)
             if self.args.use_semdp:
                 self.wt_semdp = self.args.wt_semdp
-                self.embed_semdp = nn.Embedding(len(SEMDP_TAGS), self.emb_dim)
+                self.embed_semdp = nn.Embedding(len(SEMDP_TAGS)+self.num_special_tags, self.emb_dim)
                 nn.init.xavier_uniform_(self.embed_semdp.weight.data)
        	
         elif self.args.use_lc:
@@ -37,17 +39,17 @@ class T5(nn.Module):
             self.dim_afterconcat = self.emb_dim
             if self.args.use_pos:
                 self.dim_pos = self.args.dim_pos
-                self.embed_pos = nn.Embedding(len(POS_TAGS), self.dim_pos)
+                self.embed_pos = nn.Embedding(len(POS_TAGS)+self.num_special_tags, self.dim_pos)
                 nn.init.xavier_uniform_(self.embed_pos.weight.data)
                 self.dim_afterconcat += self.dim_pos
             if self.args.use_syndp:
                 self.dim_syndp = self.args.dim_syndp
-                self.embed_syndp = nn.Embedding(len(SYNDP_TAGS), self.dim_syndp)
+                self.embed_syndp = nn.Embedding(len(SYNDP_TAGS)+self.num_special_tags, self.dim_syndp)
                 nn.init.xavier_uniform_(self.embed_syndp.weight.data)
                 self.dim_afterconcat += self.dim_syndp
             if self.args.use_semdp:
                 self.dim_semdp = self.args.dim_semdp
-                self.embed_semdp = nn.Embedding(len(SEMDP_TAGS), self.dim_semdp)
+                self.embed_semdp = nn.Embedding(len(SEMDP_TAGS)+self.num_special_tags, self.dim_semdp)
                 nn.init.xavier_uniform_(self.embed_semdp.weight.data)
                 self.dim_afterconcat += self.dim_semdp
             self.linear = nn.Linear(self.dim_afterconcat, self.emb_dim)
@@ -66,7 +68,7 @@ class T5(nn.Module):
         if self.args.use_syndp:
             syndp_embeds = self.embed_syndp(syndp_ids)
             combined_embeds = torch.cat((combined_embeds, syndp_embeds), dim=2)
-        if self.args.use_semdp:
+        if self.args.use_semdp: 
             semdp_embeds = self.embed_semdp(semdp_ids)
             combined_embeds = torch.cat((combined_embeds, semdp_embeds), dim=2)
         
@@ -75,7 +77,6 @@ class T5(nn.Module):
     
     def get_combined_embeds_wa(self, src_ids, pos_ids=None, syndp_ids=None, semdp_ids=None):
         src_embeds = self.t5.encoder.embed_tokens(src_ids)
-        combined_embeds = self.wt_src * src_embeds
 
         if self.args.use_pos:
             pos_embeds = self.embed_pos(pos_ids)
@@ -136,3 +137,4 @@ if __name__=="__main__":
 
     model = T5(args)
     print(model)
+    print(len(POS_TAGS),len(SYNDP_TAGS), len(SEMDP_TAGS))

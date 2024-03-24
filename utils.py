@@ -12,9 +12,9 @@ def train(args, epoch, tokenizer, model, device, loader, optimizer):
         src_ids = data['source_ids'].to(device, dtype = torch.long)
         mask = data['source_mask'].to(device, dtype = torch.long)
         
-        pos_ids = data['pos_ids'].to(device, dtype = torch.long) if args.use_pos else None
-        syndp_ids = data['syndp_ids'].to(device, dtype = torch.long) if args.use_syndp else None
-        semdp_ids = data['semdp_ids'].to(device, dtype = torch.long) if args.use_semdp else None
+        pos_ids = data['pos_ids'].to(device, dtype = torch.long) #if args.use_pos else None
+        syndp_ids = data['syndp_ids'].to(device, dtype = torch.long) #if args.use_syndp else None
+        semdp_ids = data['semdp_ids'].to(device, dtype = torch.long) #if args.use_semdp else None
 
         outputs = model(src_ids=src_ids, pos_ids=pos_ids, syndp_ids=syndp_ids, semdp_ids=semdp_ids, attention_mask=mask, decoder_input_ids=y_ids, labels=lm_labels)
         loss = outputs[0]

@@ -21,7 +21,7 @@ class Seq2SeqOIE(Dataset):
         if pos_column is not None:
             self.source_pos = self.data[pos_column]
             pos_tags = [self.tokenizer.pad_token] + pos_tags + [self.tokenizer.eos_token, self.tokenizer.unk_token]
-            self.pos_tag2idx = dict(zip(syndp_tags, range(len(pos_tags))))
+            self.pos_tag2idx = dict(zip(pos_tags, range(len(pos_tags))))
       
         # SynDP Tags
         if syndp_column is not None:
@@ -33,8 +33,7 @@ class Seq2SeqOIE(Dataset):
         if semdp_column is not None:
             self.source_semdp = self.data[semdp_column]
             semdp_tags = [self.tokenizer.pad_token] + semdp_tags + [self.tokenizer.eos_token, self.tokenizer.unk_token]
-            self.semdp_tag2idx = dict(zip(semdp_tags, range(len(semdp_tags))))
-            
+            self.semdp_tag2idx = dict(zip(semdp_tags, range(len(semdp_tags))))            
 
     def __len__(self):
         return len(self.source_text)
@@ -50,7 +49,6 @@ class Seq2SeqOIE(Dataset):
         target_text = ' '.join(target_text.split())
 
         prepended_text = self.prefix
-        # prepended_text = "Extract information triples"
         source_text = prepended_text + ": " + source_text
 
         source = self.tokenizer.batch_encode_plus([source_text], max_length=self.source_len, pad_to_max_length=True, truncation=True, padding="max_length", return_tensors='pt')
@@ -119,11 +117,17 @@ if __name__ == "__main__":
     dataset = load_dataset("Thanmay/lsoie_seq2seq")
     tokenizer = T5TokenizerFast.from_pretrained("t5-base")
 
-    train_set = Seq2SeqOIE(dataset["train"], "info_extract", tokenizer, 256, 256, "source", "target", pos_column="POS", syndp_column="SynDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS)
-    valid_set = Seq2SeqOIE(dataset["validation"], "info_extract", tokenizer, 256, 256, "source", "target", pos_column="POS", syndp_column="SynDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS)
-    test_set = Seq2SeqOIE(dataset["test"], "info_extract ", tokenizer, 256, 256, "source", "target", pos_column="POS", syndp_column="SynDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS)
+    train_set = Seq2SeqOIE(dataset["train"], "info_extract", tokenizer, 128, 128, "source", "target", pos_column="POS", syndp_column="SynDP", semdp_column="SemDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS, semdp_tags=SEMDP_TAGS)
+    valid_set = Seq2SeqOIE(dataset["validation"], "info_extract", tokenizer, 128, 128, "source", "target", pos_column="POS", syndp_column="SynDP", semdp_column="SemDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS, semdp_tags=SEMDP_TAGS)
+    test_set = Seq2SeqOIE(dataset["test"], "info_extract ", tokenizer, 128, 128, "source", "target", pos_column="POS", syndp_column="SynDP", semdp_column="SemDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS, semdp_tags=SEMDP_TAGS)
 
     print(train_set[0]["source_tokens"])
+    print()
+    print(train_set[0]["pos_tokens"])
+    print()
+    print(train_set[0]["syndp_tokens"])
+    print()
+    print(train_set[0]["semdp_tokens"])
 
 
 
