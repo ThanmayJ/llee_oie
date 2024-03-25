@@ -77,6 +77,7 @@ class T5(nn.Module):
     
     def get_combined_embeds_wa(self, src_ids, pos_ids=None, syndp_ids=None, semdp_ids=None):
         src_embeds = self.t5.encoder.embed_tokens(src_ids)
+        combined_embeds = self.wt_src * src_embeds
 
         if self.args.use_pos:
             pos_embeds = self.embed_pos(pos_ids)
