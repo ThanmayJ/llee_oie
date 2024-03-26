@@ -23,7 +23,7 @@ def InferOnCarb(args, model, tokenizer, device, dataset):
     predictions, _ = test(args, tokenizer, model, device, test_loader)
     final_df = pd.DataFrame({'Input Text':dataset["test"], 'Generated Text':predictions})
     final_df.to_csv(os.path.join(args.output_dir,'carb_predictions.csv'))
-    convert_predictions_to_carb_format(final_df)
+    convert_predictions_to_carb_format(final_df, args.output_dir)
     
         
 if __name__ == "__main__":  
