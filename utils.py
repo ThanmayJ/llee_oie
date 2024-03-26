@@ -92,10 +92,11 @@ def epoch_time(start_time, end_time):
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-def convert_predictions_to_carb_format(predictions):
+def convert_predictions_to_carb_format(df):
     # convert the array of strings to the required format
     new_arr = []
-    test_data = dataset["test"]['source']
+    test_data = df["Input Text"].tolist()
+    predictions = df["Generated Text"].tolist()
     for i, sent in enumerate(predictions, 1):
         # detect if multiple 3-tuples are present
         if sent.count('(') >= 1:
@@ -158,6 +159,6 @@ def convert_predictions_to_carb_format(predictions):
     # drop None rows from the array
     new_arr = [x for x in new_arr if x is not None]
     # convert the array to a dataframe
-    predictions = pd.DataFrame(new_arr, columns=['sent', 'prob', 'predicate', 'subject', 'object'])
+    output_df = pd.DataFrame(new_arr, columns=['sent', 'prob', 'predicate', 'subject', 'object'])
     # write the dataframe to a tsv file
-    predictions.to_csv(f"{args.output_dir}/carb.tsv", sep='\t', index=False, header=False)    
+    output_df.to_csv(f"{args.output_dir}/carb.tsv", sep='\t', index=False, header=False)    
