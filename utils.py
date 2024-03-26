@@ -93,7 +93,7 @@ def epoch_time(start_time, end_time):
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-def convert_predictions_to_carb_format(df):
+def convert_predictions_to_carb_format(df, output_dir):
     # convert the array of strings to the required format
     new_arr = []
     test_data = df["Input Text"].tolist()
@@ -162,4 +162,4 @@ def convert_predictions_to_carb_format(df):
     # convert the array to a dataframe
     output_df = pd.DataFrame(new_arr, columns=['sent', 'prob', 'predicate', 'subject', 'object'])
     # write the dataframe to a tsv file
-    output_df.to_csv(f"{args.output_dir}/carb.tsv", sep='\t', index=False, header=False)    
+    output_df.to_csv(f"{output_dir}/carb.tsv", sep='\t', index=False, header=False)    
