@@ -84,9 +84,9 @@ if __name__=="__main__":
         if not param.requires_grad:
             print(name)
 
-    train_set = Seq2SeqOIE(dataset["train"], args.prefix, tokenizer, args.src_len, args.trg_len, "source", "target", pos_column="POS", syndp_column="SynDP", semdp_column="SemDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS, semdp_tags=SEMDP_TAGS)
-    valid_set = Seq2SeqOIE(dataset["validation"], args.prefix, tokenizer, args.src_len, args.trg_len, "source", "target", pos_column="POS", syndp_column="SynDP", semdp_column="SemDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS, semdp_tags=SEMDP_TAGS)
-    test_set = Seq2SeqOIE(dataset["test"], args.prefix, tokenizer, args.src_len, args.trg_len, "source", "target", pos_column="POS", syndp_column="SynDP", semdp_column="SemDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS, semdp_tags=SEMDP_TAGS)
+    train_set = Seq2SeqOIE(dataset["train"], args.prefix, tokenizer, args.src_len, args.trg_len, "source", "clausie_trg", pos_column="POS", syndp_column="SynDP", semdp_column="SemDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS, semdp_tags=SEMDP_TAGS)
+    valid_set = Seq2SeqOIE(dataset["validation"], args.prefix, tokenizer, args.src_len, args.trg_len, "source", "clausie_trg", pos_column="POS", syndp_column="SynDP", semdp_column="SemDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS, semdp_tags=SEMDP_TAGS)
+    test_set = Seq2SeqOIE(dataset["test"], args.prefix, tokenizer, args.src_len, args.trg_len, "source", "clausie_trg", pos_column="POS", syndp_column="SynDP", semdp_column="SemDP", pos_tags=POS_TAGS, syndp_tags=SYNDP_TAGS, semdp_tags=SEMDP_TAGS)
 
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=0)
     valid_loader = DataLoader(valid_set, batch_size=args.batch_size, shuffle=False, num_workers=0)
