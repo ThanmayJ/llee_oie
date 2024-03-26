@@ -91,3 +91,73 @@ def epoch_time(start_time, end_time):
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+def convert_predictions_to_carb_format(predictions):
+    # convert the array of strings to the required format
+    new_arr = []
+    test_data = dataset["test"]['source']
+    for i, sent in enumerate(predictions, 1):
+        # detect if multiple 3-tuples are present
+        if sent.count('(') >= 1:
+            # split the sentence into 3-tuples
+            sent = sent.split(')')
+            # remove any leftover parenthesis
+            sent = [s.replace('(', '') for s in sent]
+            sent = [s.replace(')', '') for s in sent]
+            # split all elements of the 3-tuple into a list
+            sent = [s.split(';') for s in sent]
+            # add sentence id i to the beginning of each tuple
+            # sent = [s.insert(0, i) for s in sent]
+            for x in range(len(sent)):
+                sent[x].insert(0, test_data[i-1])
+                sent[x].insert(1, "1")
+            # if sent[i] is longer than 4, merge the additional elements into the last element
+            for s in sent:
+                if s is not None:
+                    if len(s) > 5:
+                        s[4:] = [' '.join(s[4:])]
+                    while len(s) > 5:
+                        s.pop()
+                if len(s) > 3:
+                    s[3], s[2] = s[2], s[3]
+            # print(sent)
+            sent = [s for s in sent if len(s) > 4] # remove any empty lists
+            try: #exception for TANL
+                temp = sent[-1]
+            except IndexError:
+                continue
+            if " ".join(temp[2]).strip() == "":
+                sent.pop()
+        # add the sentence to the new array, if it is a single 3-tuple
+        else:
+            sent = sent.replace('(', '')
+            sent = sent.replace(')', '')
+            sent = sent.split(';')
+            sent.insert(0, test_data[i-1])
+            sent.insert(1, "1")
+            # if sent is longer than 5, merge subsequent elements
+            if len(sent) > 5:
+                sent[4:] = [' '.join(sent[4:])]
+                while len(sent) > 5:
+                    sent.pop()
+            if len(sent) > 3:
+                sent[3], sent[2] = sent[2], sent[3]
+            sent = [sent]
+        # add the sentence to the new array
+        sent = [s for s in sent if len(s) > 4]
+        if sent != None:
+            new_arr.extend(sent)
+
+    print(len(new_arr), len(new_arr[0]))
+    for i in range(len(new_arr)):
+        if  new_arr[i] is None: 
+            print("Null: ", i, new_arr[i])
+        elif len(new_arr[i]) != 5:
+            print("Not 5, but ",len(new_arr[i]),i, new_arr[i])
+
+    # drop None rows from the array
+    new_arr = [x for x in new_arr if x is not None]
+    # convert the array to a dataframe
+    predictions = pd.DataFrame(new_arr, columns=['sent', 'prob', 'predicate', 'subject', 'object'])
+    # write the dataframe to a tsv file
+    predictions.to_csv(f"{args.output_dir}/carb.tsv", sep='\t', index=False, header=False)    
