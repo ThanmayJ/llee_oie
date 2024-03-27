@@ -65,7 +65,7 @@ if __name__ == "__main__":
     tokenizer = T5TokenizerFast.from_pretrained(args.model)
 
     model = T5(args).to(device)
-    # model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path))
 
     dataset = load_dataset("Thanmay/carb_seq2seq")
 
